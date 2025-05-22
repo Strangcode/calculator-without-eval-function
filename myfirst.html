@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello World!</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div>
+      
+    
+      <h1 class="title">Stranger  </h1>
+      <input id="input" name="" placeholder="input" />
+      
+      <br />
+      <input id="ans" name="" placeholder="Answer" />
+      <br />
+      <button class="btn" onclick="press('9')">9</button>
+      <button class="btn" onclick="press('8')">8</button>
+      <button class="btn" onclick="press('7')">7</button>
+      <button class="btn" onclick="press('+')">+</button>
+      <br />
+      <button class="btn" onclick="press('6')">6</button>
+      <button class="btn" onclick="press('5')">5</button>
+      <button class="btn" onclick="press('4')">4</button>
+      <button class="btn" onclick="press('-')">-</button>
+      <br />
+      <button class="btn" onclick="press('3')">3</button>
+      <button class="btn" onclick="press('2')">2</button>
+      <button class="btn" onclick="press('1')">1</button>
+      <button class="btn"  onclick="press('/')">/</button>
+      <br />
+      
+      <button class="btn" onclick="press('0')">0</button>
+      <button class="btn" onclick="press('.')">.</button>
+      <!--<button type="" onclick="clearAll()">Clear</button>-->
+       <button class="btn"  onclick="press('%')">%</button>
+       
+       <!--<button class="btn" style="background-color: orange" onclick="clr()">C</button>-->
+        <button class="btn" onclick="press('*')">*</button>
+        <br />
+         <button class="btn"  onclick="clr()">C</button>
+         <button class="btn"  onclick="calculate()">=</button>
+         <button class="btn"  onclick="backspace()" > < </button>
+         <button class="btn"  onclick="clrAll()">CA</button>
+       </div>    
+      <script>
+        
+         
+      var display = document.getElementById("input");
+      var display2 = document.getElementById("ans");
+      var exp = "";
+
+      var btn = document.getElementsByClassName("btn");
+
+        for (var i = 0; i < btn.length; i++) {
+         btn[i].addEventListener("mouseover", function () {
+           this.style.backgroundColor = "orange";
+    
+           setTimeout(() => {
+          this.style.backgroundColor = "black";  // Corrected typo: 'balck' -> 'black'
+       }, 100);
+        });
+      }
+      
+               
+             
+      // var op ="";
+        document.getElementById("input").focus();
+       function press(value){
+         exp = exp + value;
+         display.value = exp;
+         
+      }
+      
+      function clrAll(){
+        
+        exp = "";
+        display.value = "";
+        display2.value ="";
+        
+      }
+      
+      function backspace(){
+        
+        exp = exp.slice(0,-1);
+        display.value = exp;
+      }
+       
+      function clr(){
+         
+          exp = "";
+          display.value = "";
+          // display2.value = "";
+         
+      }
+       
+      function calculate(){
+         
+        let token = exp.match(/(\d+(\.\d+)?|\.\d+|[+\-*/])/g);
+         
+         
+           token = token.map(t => {
+    if (t.startsWith('.') && /^\.\d+$/.test(t)) {
+      return '0' + t;
+    }
+    return t;
+  });
+         
+      let num1 = parseFloat(token[0]);
+        
+       
+
+                    
+        for(let i=1; i<token.length; i=i+2){
+           
+              let op = token[i];
+              
+              let num2 = parseFloat(token[i+1])
+              
+              switch (op) {
+                case '+':
+                      num1 = parseFloat(num1) + parseFloat(num2);
+                  break;
+                  
+                  case '*':
+                      num1 = parseFloat(num1) * parseFloat(num2);
+                  break;
+                  
+                  case '/':
+                      num1 = parseFloat(num1) / parseFloat(num2);
+                  break;
+                  
+                  case '-':
+                      num1 = parseFloat(num1) - parseFloat(num2);
+                  break;
+                default:
+                  num1 = "error";
+              }
+           
+        }
+         
+            display2.value = num1;
+            
+      }
+       
+       
+
+     
+        
+      </script>
+  </body>
+</html>
