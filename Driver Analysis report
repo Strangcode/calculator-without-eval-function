@@ -1,0 +1,606 @@
+@imports _3G_CMS
+@imports Newtonsoft.Json
+@imports Newtonsoft.Json.Linq
+@Imports System.Globalization
+@code
+
+    Select Case ViewData("ACTION")
+
+        Case "INDEX"
+
+            'Dim FFF = "211".GetAll(IndexProp:="P2654", IndeXPropValue:="2")
+            'For Each objjjj In FFF
+            '    Dim oj16 = "16".GetOne(IndexProp:="P177", IndeXPropValue:=objjjj.String_("P2652"))
+            '    Dim dname = oj16.String_("P167")
+
+            'Next
+            Dim listformmdata As New List(Of formmdata.Class_formmdata)
+            Dim list16 = "16".GetAll(WithOutClone:=True, FILTER:=False, IndexProp:="P293", IndeXPropValue:="1", match:=Function(x) x.String_("P2649") <> "4" AndAlso x.String_("P9340") = "1")
+
+            'Dim hashDriver As New HashSet(Of String)(list16.Select(Function(x) x.String_("P177")))
+            '    Dim List4 = "4".GetAll(match:=Function(x) x.String_("P89") = 1 AndAlso (hashDriver.Contains(x.getVal(Of String)("P29") OrElse hashDriver.Contains(x.getVal(Of String)("P9887")))))
+            'Dim List4 = "4".GetAll(match:=Function(x) x.String_("P89") = "1" AndAlso {x.String_("P29"), x.String_("P9887")}.Any(Function(val) hashDriver.Contains(val)))
+
+            list16 = list16.FindAll(match:=Function(x) x.FormmDataId = "11efc4d1c64d49d58ea1b42e99c9ae13")
+
+            Dim obj9 = "A-9".GetOne(IndexProp:="P97", IndeXPropValue:="DRIVER ISSUE FOR ANALYSIS REPORT")
+            Dim obj9_ER = "A-9".GetOne(IndexProp:="P97", IndeXPropValue:="DRIVER EXTRA RUN FOR ANALYSIS REPORT")
+            Dim DRIVER_EXTRA_RUN = ""
+            Dim DRIVER_ISSUE_CODE = ""
+            If obj9 IsNot Nothing Then
+                DRIVER_ISSUE_CODE = obj9.String_("P98")
+            End If
+            If obj9_ER IsNot Nothing Then
+                DRIVER_EXTRA_RUN = obj9_ER.String_("P98")
+            End If
+            For Each Obj In list16
+
+                Dim obj698 As New formmdata.Class_formmdata With {.FormmId = "698"}
+
+                '=========================     Diesel Issue & extra Run    =======================
+                'List4 = List4.FindAll(match:=Function(x) x.String_("P29") = Obj.String_("P177") OrElse x.String_("P9887") = Obj.String_("P177"))
+                Dim List4 = "4".GetAll(WithOutClone:=True, FILTER:=False, IndexProp:="P89", IndeXPropValue:="1", match:=Function(x) x.String_("P29") = Obj.String_("P177") OrElse x.String_("P9887") = Obj.String_("P177"))
+
+                'For Each obj4 In List4
+                '    Dim formdataid_A = obj4.String_("P8101")
+                '    Dim obj565 = "565".GetOne(FILTER:=False, FormmDataId:=formdataid_A)
+                'Next
+
+
+
+                'Dim List4DR = List4.FindAll(Function(x) x.String_("P8101") = DRIVER_ISSUE_CODE OrElse x.String_("P8102") = DRIVER_ISSUE_CODE OrElse x.String_("P8103") = DRIVER_ISSUE_CODE)
+                'Dim List4ER = List4.FindAll(Function(x) x.String_("P8101") = DRIVER_EXTRA_RUN OrElse x.String_("P8102") = DRIVER_EXTRA_RUN OrElse x.String_("P8103") = DRIVER_EXTRA_RUN)
+                'Dim issue_Count = List4DR.Count
+                'Dim ERissue_Count = List4ER.Count
+
+                Dim TotalDS As Double = 0.00
+                Dim TotalER As Double = 0.00
+
+                For Each Obj4 In List4
+                    '' 11ed6d49f285ca3f8395b42e99c9ae13
+                    If Obj4.String_("P242") = "2" AndAlso Obj4.String_("P8101") = DRIVER_ISSUE_CODE Then
+                        Dim TotalDS1 = Obj4.Double_("P246")
+                        TotalDS = TotalDS + TotalDS1
+                    End If
+                    If Obj4.String_("P248") = "2" AndAlso Obj4.String_("P8102") = DRIVER_ISSUE_CODE Then
+                        Dim TotalDS2 = Obj4.Double_("P252")
+                        TotalDS = TotalDS + TotalDS2
+                    End If
+                    If Obj4.String_("P254") = "2" AndAlso Obj4.String_("P8103") = DRIVER_ISSUE_CODE Then
+                        Dim TotalDS3 = Obj4.Double_("P258")
+                        TotalDS = TotalDS + TotalDS3
+                    End If
+                    If Obj4.String_("P242") = "2" AndAlso Obj4.String_("P8101") = DRIVER_EXTRA_RUN Then
+                        Dim TotalDS1 = Obj4.Double_("P246")
+                        TotalER = TotalER + TotalDS1
+                    End If
+                    If Obj4.String_("P248") = "2" AndAlso Obj4.String_("P8102") = DRIVER_EXTRA_RUN Then
+                        Dim TotalDS2 = Obj4.Double_("P252")
+                        TotalER = TotalER + TotalDS2
+                    End If
+                    If Obj4.String_("P254") = "2" AndAlso Obj4.String_("P8103") = DRIVER_EXTRA_RUN Then
+                        Dim TotalDS3 = Obj4.Double_("P258")
+                        TotalER = TotalER + TotalDS3
+                    End If
+
+
+
+
+                Next
+
+
+                'For Each Obj4 In List4ER
+                '    '' 11ed6d49f285ca3f8395b42e99c9ae13
+
+                'Next
+                Dim MasterCreateDate As String = ""
+                Dim MasterDays As Integer = 0
+
+                '=========================     SinceDate    =======================
+                Dim creationDate As DateTime = Obj.CreationDate.Date
+                Dim today As DateTime = DateTime.Now.Date
+
+                Dim calendarNew As Calendar = CultureInfo.InvariantCulture.Calendar
+
+                Dim years As Integer = calendarNew.GetYear(today) - calendarNew.GetYear(creationDate)
+                Dim months As Integer = calendarNew.GetMonth(today) - calendarNew.GetMonth(creationDate)
+                Dim days As Integer = calendarNew.GetDayOfMonth(today) - calendarNew.GetDayOfMonth(creationDate)
+
+                ' Adjust days if negative
+                If days < 0 Then
+                    months -= 1
+                    Dim previousMonthDate As DateTime = today.AddMonths(-1)
+                    days += calendarNew.GetDaysInMonth(previousMonthDate.Year, previousMonthDate.Month)
+                End If
+
+                ' Adjust months if negative
+                If months < 0 Then
+                    years -= 1
+                    months += 12
+                End If
+
+                If days >= 30 Then
+                    months += days \ 30    ' \ is integer division
+                    days = days Mod 30    ' Remaining days
+                End If
+
+                'Normalize months to years
+                If months >= 12 Then
+                    years += months \ 12
+                    months = months Mod 12
+                End If
+
+                MasterCreateDate = years.ToString() & "Y " & months.ToString() & "M " & days.ToString() & "D"
+                MasterDays = (years * 365) + (months * 30) + days
+
+
+                '=========================     Total Salary    =======================
+
+                'Dim listSalary = "HRRKR-25".GetAll(match:=Function(x) x.String_("P346") = Obj.String_("P177") AndAlso x.String_("P354") <> "")
+                'Dim TotalSalary = listSalary.Sum(Function(x) x.Double_("P350"))
+
+
+                Dim TotalSalary = "HRRKR-3".GetAll(WithOutClone:=True, match:=Function(x) x.String_("P16") = Obj.String_("P177") AndAlso x.String_("P38") <> "").Sum(Function(x) x.Double_("P145"))
+                'Dim TotalSalary = listSalary
+
+                '------------------------------------------------------------------------------------------------------------------------------------
+                Dim List211A = "211".GetAll(WithOutClone:=True, IndexProp:="P2652", IndeXPropValue:=Obj.String_("P177")).OrderBy(Function(x) x.getVal(Of Date)("P2690")).ToList
+
+                Dim lastObj = List211A.LastOrDefault() '/// LATEST LOG
+
+
+                Dim firstObj = List211A.FirstOrDefault() '/// first LOG  
+
+
+                Dim DrivingjDate As Date = Nothing
+                Dim VacationjDate As Date = Nothing
+                Dim TotalRtrDays As String = ""
+                Dim AdvancedAmount As Double = 0
+                Dim DriverIncentive As Double = 0
+                Dim DriverPenalty As Double = 0
+                Dim DrivingOnDate = ""
+                Dim OnDriving_Count = " "
+                Dim OnVacation_Count = " "
+                Dim OnDrivingDate As Date = Nothing
+                Dim OnVacationDateOld As Date = Nothing
+
+                Dim OnVacationDate As Date = Nothing
+                Dim OnDrivingDateN As Date = Nothing
+                Dim OnVacationDateN As Date = Nothing
+                Dim OnVacationCount = 0
+                Dim TotalyearsD As Integer = 0
+                Dim TotalmonthsD As Integer = 0
+                Dim TotaldayssD As Integer = 0
+                Dim TotalyearsV As Integer = 0
+                Dim TotalmonthsV As Integer = 0
+                Dim TotaldayssV As Integer = 0
+                Dim TotalDrivingDays As String = ""
+                Dim TotalVactionDays As String = ""
+                Dim OnDrivingDateNew As Date = Nothing
+                Dim OnVacationDateNew As Date = Nothing
+                Dim totalLog As Integer = 0
+                Dim DrivingDays As Integer = 0
+                Dim Avg As Double = 0
+                Dim AllVehicleTypesCommaSeparated As String = ""
+                For Each ObjA In List211A
+                    If List211A.Count > 0 Then
+                        totalLog += 1
+                        If ObjA.String_("P2654") <> "4" OrElse ObjA.String_("P2654") <> "2" Then
+                            If ObjA.String_("P2654") = "3" Then        'ON DRIVING
+                                OnDrivingDate = Date.Parse(ObjA.Date_("P2651"))
+                                OnDriving_Count = "Yes"
+                            ElseIf ObjA.String_("P2654") = "1" Then       'ON VACTION
+                                OnVacationDate = Date.Parse(ObjA.Date_("P2651"))
+                                OnVacationDateOld = Date.Parse(ObjA.Date_("P2651"))
+                                OnVacation_Count = "Yes"
+                                OnVacationCount += 1
+                            End If
+
+                            If totalLog = List211A.Count Then
+                                If ObjA.String_("P2654") = "1" Then
+                                    OnDrivingDateNew = Date.Now
+                                ElseIf ObjA.String_("P2654") = "3" Then
+                                    OnVacationDateNew = Date.Now
+                                    OnVacationCount += 1
+                                End If
+                            End If
+                            '=========================    Total Driving days   =======================
+
+                            If totalLog = List211A.Count Then
+                                If lastObj.String_("P2654") = "3" Then
+                                    OnVacationDate = OnVacationDateNew
+                                End If
+                            End If
+                            If OnDriving_Count = OnVacation_Count AndAlso OnVacationCount > 1 Then
+                                If lastObj.String_("P2654") = "3" Then
+
+                                End If
+                                Dim calendar As Calendar = CultureInfo.InvariantCulture.Calendar
+
+                                Dim yearsD As Integer = calendar.GetYear(OnVacationDate) - calendar.GetYear(OnDrivingDate)
+                                Dim monthsD As Integer = calendar.GetMonth(OnVacationDate) - calendar.GetMonth(OnDrivingDate)
+                                Dim daysD As Integer = calendar.GetDayOfMonth(OnVacationDate) - calendar.GetDayOfMonth(OnDrivingDate)
+
+                                ' Adjust days if negative
+                                If daysD < 0 Then
+                                    monthsD -= 1
+                                    Dim previousMonthDate As DateTime = OnVacationDate.AddMonths(-1)
+                                    daysD += calendar.GetDaysInMonth(previousMonthDate.Year, previousMonthDate.Month)
+                                End If
+
+                                ' Adjust months if negative
+                                If monthsD < 0 Then
+                                    yearsD -= 1
+                                    monthsD += 12
+                                End If
+
+                                TotalyearsD = TotalyearsD + yearsD
+                                TotalmonthsD = TotalmonthsD + monthsD
+                                TotaldayssD = TotaldayssD + daysD
+
+                                If TotaldayssD >= 30 Then
+                                    TotalmonthsD += TotaldayssD \ 30    ' \ is integer division
+                                    TotaldayssD = TotaldayssD Mod 30    ' Remaining days
+                                End If
+
+                                'Normalize months to years
+                                If TotalmonthsD >= 12 Then
+                                    TotalyearsD += TotalmonthsD \ 12
+                                    TotalmonthsD = TotalmonthsD Mod 12
+                                End If
+                                OnVacation_Count = ""
+
+
+                            End If
+                            TotalDrivingDays = TotalyearsD.ToString() & "Y " & TotalmonthsD.ToString() & "M " & TotaldayssD.ToString() & "D"
+
+                            DrivingDays = (TotalyearsD * 365) + (TotalmonthsD * 30) + TotaldayssD
+
+
+                            '=========================    Total Vactions days   =======================
+                            If totalLog = List211A.Count Then
+                                If lastObj.String_("P2654") = "1" Then
+                                    OnDrivingDate = OnDrivingDateNew
+                                End If
+                            End If
+                            If List211A.Count >= 2 Then
+                                Dim first2ndObj = List211A(1) '// previous second log
+                                If firstObj.String_("P2654") = "1" AndAlso first2ndObj.String_("P2654") = "3" Then
+                                    If firstObj.Date_("P2651") = first2ndObj.Date_("P2651") Then
+                                        If OnVacationDate < OnDrivingDate AndAlso OnVacationCount > 1 Then
+
+                                            ' Swap dates if needed so calculation is always from earlier to later
+                                            If OnVacationDate < OnDrivingDate Then
+                                                Dim temp = OnDrivingDate
+                                                OnDrivingDateN = OnVacationDate
+                                                OnVacationDateN = temp
+                                            End If
+
+                                            Dim calendar As Calendar = CultureInfo.InvariantCulture.Calendar
+
+                                            Dim yearsV As Integer = calendar.GetYear(OnVacationDateN) - calendar.GetYear(OnDrivingDateN)
+                                            Dim monthsV As Integer = calendar.GetMonth(OnVacationDateN) - calendar.GetMonth(OnDrivingDateN)
+                                            Dim daysV As Integer = calendar.GetDayOfMonth(OnVacationDateN) - calendar.GetDayOfMonth(OnDrivingDateN)
+
+                                            ' Adjust days if negative
+                                            If daysV < 0 Then
+                                                monthsV -= 1
+                                                Dim previousMonthDate As DateTime = OnVacationDateN.AddMonths(-1)
+                                                daysV += calendar.GetDaysInMonth(previousMonthDate.Year, previousMonthDate.Month)
+                                            End If
+
+                                            ' Adjust months if negative
+                                            If monthsV < 0 Then
+                                                yearsV -= 1
+                                                monthsV += 12
+                                            End If
+
+                                            TotalyearsV = TotalyearsV + yearsV
+                                            TotalmonthsV = TotalmonthsV + monthsV
+                                            TotaldayssV = TotaldayssV + daysV
+
+                                            If TotaldayssV >= 30 Then
+                                                TotalmonthsV += TotaldayssV \ 30    ' \ is integer division
+                                                TotaldayssV = TotaldayssV Mod 30    ' Remaining days
+                                            End If
+
+                                            'Normalize months to years
+                                            If TotalmonthsV >= 12 Then
+                                                TotalyearsV += TotalmonthsV \ 12
+                                                TotalmonthsV = TotalmonthsV Mod 12
+                                            End If
+                                            OnVacation_Count = ""
+
+                                            TotalVactionDays = TotalyearsV.ToString() & "Y " & TotalmonthsV.ToString() & "M " & TotaldayssV.ToString() & "D"
+
+                                        ElseIf OnVacationDateOld < OnDrivingDate AndAlso OnVacationCount > 1 Then
+
+                                            ' Swap dates if needed so calculation is always from earlier to later
+                                            If OnVacationDateOld < OnDrivingDate Then
+                                                Dim temp = OnDrivingDate
+                                                OnDrivingDateN = OnVacationDateOld
+                                                OnVacationDateN = temp
+                                            End If
+
+                                            Dim calendar As Calendar = CultureInfo.InvariantCulture.Calendar
+
+                                            Dim yearsV As Integer = calendar.GetYear(OnVacationDateN) - calendar.GetYear(OnDrivingDateN)
+                                            Dim monthsV As Integer = calendar.GetMonth(OnVacationDateN) - calendar.GetMonth(OnDrivingDateN)
+                                            Dim daysV As Integer = calendar.GetDayOfMonth(OnVacationDateN) - calendar.GetDayOfMonth(OnDrivingDateN)
+
+                                            ' Adjust days if negative
+                                            If daysV < 0 Then
+                                                monthsV -= 1
+                                                Dim previousMonthDate As DateTime = OnVacationDateN.AddMonths(-1)
+                                                daysV += calendar.GetDaysInMonth(previousMonthDate.Year, previousMonthDate.Month)
+                                            End If
+
+                                            ' Adjust months if negative
+                                            If monthsV < 0 Then
+                                                yearsV -= 1
+                                                monthsV += 12
+                                            End If
+
+                                            TotalyearsV = TotalyearsV + yearsV
+                                            TotalmonthsV = TotalmonthsV + monthsV
+                                            TotaldayssV = TotaldayssV + daysV
+
+                                            If TotaldayssV >= 30 Then
+                                                TotalmonthsV += TotaldayssV \ 30    ' \ is integer division
+                                                TotaldayssV = TotaldayssV Mod 30    ' Remaining days
+                                            End If
+
+                                            'Normalize months to years
+                                            If TotalmonthsV >= 12 Then
+                                                TotalyearsV += TotalmonthsV \ 12
+                                                TotalmonthsV = TotalmonthsV Mod 12
+                                            End If
+                                            OnVacation_Count = ""
+
+                                            TotalVactionDays = TotalyearsV.ToString() & "Y " & TotalmonthsV.ToString() & "M " & TotaldayssV.ToString() & "D"
+                                        End If
+                                    Else
+                                        If OnVacationDate < OnDrivingDate AndAlso OnVacationCount >= 1 Then
+
+                                            ' Swap dates if needed so calculation is always from earlier to later
+                                            If OnVacationDate < OnDrivingDate Then
+                                                Dim temp = OnDrivingDate
+                                                OnDrivingDateN = OnVacationDate
+                                                OnVacationDateN = temp
+                                            End If
+
+                                            Dim calendar As Calendar = CultureInfo.InvariantCulture.Calendar
+
+                                            Dim yearsV As Integer = calendar.GetYear(OnVacationDateN) - calendar.GetYear(OnDrivingDateN)
+                                            Dim monthsV As Integer = calendar.GetMonth(OnVacationDateN) - calendar.GetMonth(OnDrivingDateN)
+                                            Dim daysV As Integer = calendar.GetDayOfMonth(OnVacationDateN) - calendar.GetDayOfMonth(OnDrivingDateN)
+
+                                            ' Adjust days if negative
+                                            If daysV < 0 Then
+                                                monthsV -= 1
+                                                Dim previousMonthDate As DateTime = OnVacationDateN.AddMonths(-1)
+                                                daysV += calendar.GetDaysInMonth(previousMonthDate.Year, previousMonthDate.Month)
+                                            End If
+
+                                            ' Adjust months if negative
+                                            If monthsV < 0 Then
+                                                yearsV -= 1
+                                                monthsV += 12
+                                            End If
+
+                                            TotalyearsV = TotalyearsV + yearsV
+                                            TotalmonthsV = TotalmonthsV + monthsV
+                                            TotaldayssV = TotaldayssV + daysV
+
+                                            If TotaldayssV >= 30 Then
+                                                TotalmonthsV += TotaldayssV \ 30    ' \ is integer division
+                                                TotaldayssV = TotaldayssV Mod 30    ' Remaining days
+                                            End If
+
+                                            'Normalize months to years
+                                            If TotalmonthsV >= 12 Then
+                                                TotalyearsV += TotalmonthsV \ 12
+                                                TotalmonthsV = TotalmonthsV Mod 12
+                                            End If
+                                            OnVacation_Count = ""
+
+                                            TotalVactionDays = TotalyearsV.ToString() & "Y " & TotalmonthsV.ToString() & "M " & TotaldayssV.ToString() & "D"
+
+                                        ElseIf OnVacationDateOld < OnDrivingDate AndAlso OnVacationCount > 1 Then
+
+                                            ' Swap dates if needed so calculation is always from earlier to later
+                                            If OnVacationDateOld < OnDrivingDate Then
+                                                Dim temp = OnDrivingDate
+                                                OnDrivingDateN = OnVacationDateOld
+                                                OnVacationDateN = temp
+                                            End If
+
+                                            Dim calendar As Calendar = CultureInfo.InvariantCulture.Calendar
+
+                                            Dim yearsV As Integer = calendar.GetYear(OnVacationDateN) - calendar.GetYear(OnDrivingDateN)
+                                            Dim monthsV As Integer = calendar.GetMonth(OnVacationDateN) - calendar.GetMonth(OnDrivingDateN)
+                                            Dim daysV As Integer = calendar.GetDayOfMonth(OnVacationDateN) - calendar.GetDayOfMonth(OnDrivingDateN)
+
+                                            ' Adjust days if negative
+                                            If daysV < 0 Then
+                                                monthsV -= 1
+                                                Dim previousMonthDate As DateTime = OnVacationDateN.AddMonths(-1)
+                                                daysV += calendar.GetDaysInMonth(previousMonthDate.Year, previousMonthDate.Month)
+                                            End If
+
+                                            ' Adjust months if negative
+                                            If monthsV < 0 Then
+                                                yearsV -= 1
+                                                monthsV += 12
+                                            End If
+
+                                            TotalyearsV = TotalyearsV + yearsV
+                                            TotalmonthsV = TotalmonthsV + monthsV
+                                            TotaldayssV = TotaldayssV + daysV
+
+                                            If TotaldayssV >= 30 Then
+                                                TotalmonthsV += TotaldayssV \ 30    ' \ is integer division
+                                                TotaldayssV = TotaldayssV Mod 30    ' Remaining days
+                                            End If
+
+                                            'Normalize months to years
+                                            If TotalmonthsV >= 12 Then
+                                                TotalyearsV += TotalmonthsV \ 12
+                                                TotalmonthsV = TotalmonthsV Mod 12
+                                            End If
+                                            OnVacation_Count = ""
+
+                                            TotalVactionDays = TotalyearsV.ToString() & "Y " & TotalmonthsV.ToString() & "M " & TotaldayssV.ToString() & "D"
+                                        End If
+
+                                    End If
+                                End If
+                            Else
+                                TotalDrivingDays = "0Y 0M 0D"
+                                TotalVactionDays = MasterCreateDate
+
+                            End If
+
+                        End If
+                    End If
+
+
+                    '=========================     Body Types    =======================
+                    Dim BodyTypes As New List(Of String)
+
+                    Dim Vehicle = ObjA.String_("P2653")
+                    Dim ObjVehicleMaster = "15".GetOne(IndexProp:="P163", IndeXPropValue:=Vehicle)
+                    If ObjVehicleMaster IsNot Nothing Then
+                        Dim Obj635Master = "635".GetOne(FILTER:=False, FormmDataId:=ObjVehicleMaster.String_("P3174"))
+                        Dim VehicleType = Obj635Master.String_("P9185")
+                        If Not String.IsNullOrWhiteSpace(VehicleType) AndAlso Not BodyTypes.Contains(VehicleType) Then
+                            BodyTypes.Add(VehicleType)
+                        End If
+                    End If
+
+
+
+                    AllVehicleTypesCommaSeparated = String.Join(",", BodyTypes)
+
+
+
+                Next
+
+
+                '=========================   Avarage   =======================
+                Avg = Math.Round((DrivingDays * 100) / MasterDays, 2)
+
+                '=========================    Driver Advanced   =======================
+                Dim ListAdvance = "HRRKR-12".GetAll(WithOutClone:=True, IndexProp:="P132", IndeXPropValue:=Obj.String_("P177"), match:=Function(X) X.String_("P159") = "2" AndAlso X.String_("P137") = "1")
+                If ListAdvance.Count > 0 Then
+                    AdvancedAmount = ListAdvance.Sum(Function(x) x.Double_("P135"))
+                End If
+
+                '=========================    Driver Incentive   =======================
+                Dim ListIncentive = "HRRKR-12".GetAll(WithOutClone:=True, IndexProp:="P132", IndeXPropValue:=Obj.String_("P177"), match:=Function(x) x.String_("P159") = "2" AndAlso x.String_("P137") = "2" AndAlso x.String_("P334") = "2")
+                If ListIncentive.Count > 0 Then
+                    DriverIncentive = ListIncentive.Sum(Function(x) x.Double_("P135"))
+                End If
+
+                '=========================    Driver Panalty   =======================
+                Dim ListPenalty = "HRRKR-12".GetAll(WithOutClone:=True, IndexProp:="P132", IndeXPropValue:=Obj.String_("P177"), match:=Function(x) x.String_("P137") = "3" AndAlso x.String_("P159") = "2" AndAlso x.String_("P334") = "2")
+                If ListPenalty.Count > 0 Then
+                    DriverPenalty = ListPenalty.Sum(Function(x) x.Double_("P135"))
+                End If
+
+                'Dim List211 = List211A.FindAll(match:=Function(x) x.String_("P2654") = "3")
+                ''   Dim List211 = "211".GetAll(WithOutClone:=True, IndexProp:="P2652", IndeXPropValue:=Obj.String_("P177"), match:=Function(x) x.String_("P2654") = "3").OrderBy(Function(x) x.getVal(Of Date)("P2690")).ToList
+
+
+                '=========================  Driver Return   =======================
+                If List211A.Count >= 2 Then
+                    Dim last2ndObj = List211A(List211A.Count - 2) '// previous second log
+                    If last2ndObj IsNot Nothing AndAlso lastObj IsNot Nothing Then
+                        If lastObj.String_("P2654") = "3" OrElse lastObj.String_("P2654") = "2" Then
+                            DrivingjDate = lastObj.getVal(Of Date)("P2651")
+                            VacationjDate = last2ndObj.getVal(Of Date)("P2651")
+
+                            Dim calendarRtr As Calendar = CultureInfo.InvariantCulture.Calendar
+
+                            Dim yearsRtr As Integer = calendarRtr.GetYear(DrivingjDate) - calendarRtr.GetYear(VacationjDate)
+                            Dim monthsRtr As Integer = calendarRtr.GetMonth(DrivingjDate) - calendarRtr.GetMonth(VacationjDate)
+                            Dim daysRtr As Integer = calendarRtr.GetDayOfMonth(DrivingjDate) - calendarRtr.GetDayOfMonth(VacationjDate)
+
+                            ' Adjust days if negative
+                            If daysRtr < 0 Then
+                                monthsRtr -= 1
+                                Dim previousMonthDateRtr As DateTime = DrivingjDate.AddMonths(-1)
+                                daysRtr += calendarRtr.GetDaysInMonth(previousMonthDateRtr.Year, previousMonthDateRtr.Month)
+                            End If
+
+                            ' Adjust months if negative
+                            If monthsRtr < 0 Then
+                                yearsRtr -= 1
+                                monthsRtr += 12
+                            End If
+
+                            If TotaldayssV >= 30 Then
+                                TotalmonthsV += TotaldayssV \ 30    ' \ is integer division
+                                TotaldayssV = TotaldayssV Mod 30    ' Remaining days
+                            End If
+
+                            'Normalize months to years
+                            If TotalmonthsV >= 12 Then
+                                TotalyearsV += TotalmonthsV \ 12
+                                TotalmonthsV = TotalmonthsV Mod 12
+                            End If
+
+                            TotalRtrDays = yearsRtr.ToString() & "Y " & monthsRtr.ToString() & "M " & daysRtr.ToString() & "D"
+                        Else
+                            TotalRtrDays = "Still on Vacation"
+                        End If
+                    End If
+                Else
+                    TotalRtrDays = "Still on Vacation"
+                End If
+
+                '10075       DRIVER NAME
+                '10076       BODY TYPE
+                '10078       MASTER CREATION
+                '10077       TOTAL DRIVING
+                '10260       TOTAL VACATIONS
+                '10262       AVG %
+                '10079       TILL SALARY PAY
+                '10263       TILL ADVANCE PAY
+                '10264       TILL INCENTIVE PAY
+                '10265       TOTAL PAY
+                '10266       DRIVER PANALITY
+                '10080       EXTRA DIESEL PAY ISSUE
+                '10081       EXTRA RUN
+                '10082       DRIVER RETURN
+
+                obj698.setVal(Of String)("P10075", Obj.String_("P167") & " -  " & Obj.String_("P168"))          '  DRIVER NAME
+                ' obj698.setVal(Of String)("P10075", Driver_Name + Driver_Mobile)          '  DRIVER NAME
+
+
+
+
+                obj698.setVal(Of String)("P10076", AllVehicleTypesCommaSeparated)  ' BODY TYPE
+                obj698.setVal(Of String)("P10078", MasterCreateDate)             ' MASTER CREATION
+                obj698.setVal(Of String)("P10077", TotalDrivingDays)             ' TOTAL DRIVING
+                obj698.setVal(Of String)("P10260", TotalVactionDays)             ' TOTAL VACATIONS
+                obj698.setVal(Of String)("P10262", Avg.ToString() & "%")             ' Avg
+                obj698.setVal(Of Double)("P10079", TotalSalary)                   'salary pay
+                obj698.setVal(Of Double)("P10263", AdvancedAmount)             ' TOTAL Advanced
+                obj698.setVal(Of Double)("P10264", DriverIncentive)             ' TOTAL Incentive
+                obj698.setVal(Of Double)("P10265", TotalSalary + AdvancedAmount + DriverIncentive)             ' TOTAL PAY
+                obj698.setVal(Of Double)("P10266", DriverPenalty)             ' TOTAL DriverPenalty
+                obj698.setVal(Of Double)("P10080", TotalDS)                '  EXTRA DIESEL PAY ISSUE
+                obj698.setVal(Of Double)("P10081", TotalER)                '  EXTRA RUN
+                obj698.setVal(Of String)("P10082", TotalRtrDays)             ' Driver Return 
+
+                listformmdata.Add(obj698)
+            Next
+
+            ViewData("ListFormmData") = listformmdata
+
+
+    End Select
+
+End Code
+
